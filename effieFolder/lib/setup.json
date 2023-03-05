@@ -1,0 +1,251 @@
+{
+  "barList": [
+    {
+      "icon": "icon-sousuo",
+      "name": "搜索",
+      "canDelete": false
+    },
+    {
+      "icon": "icon-shuben",
+      "name": "全部",
+      "canDelete": false
+    },
+    {
+      "icon": "icon-shanchu",
+      "name": "废纸篓",
+      "canDelete": false
+    }
+  ],
+  "userList": [
+    {
+      "icon": "icon-shuben",
+      "name": "文稿箱",
+      "canDelete": false,
+      "children": [
+        {
+          "name": "1677929258172.md",
+          "canDelete": true
+        },
+        {
+          "name": "1678011946323.md",
+          "canDelete": true
+        },
+        {
+          "name": "1678011947109.md",
+          "canDelete": true
+        }
+      ]
+    },
+    {
+      "icon": "icon-shuben",
+      "name": "新建文件夹",
+      "canDelete": true,
+      "children": [
+        {
+          "name": "1677928265995.md",
+          "canDelete": true
+        },
+        {
+          "name": "1677929129139.md",
+          "canDelete": true
+        },
+        {
+          "name": "1677929139473.md",
+          "canDelete": true
+        },
+        {
+          "name": "1677929218455.md",
+          "canDelete": true
+        },
+        {
+          "name": "1677929221239.md",
+          "canDelete": true
+        },
+        {
+          "name": "1677929383004.md",
+          "canDelete": true
+        }
+      ]
+    },
+    {
+      "name": "123",
+      "canDelete": true,
+      "icon": "icon-shuben",
+      "children": [
+        {
+          "name": "1678012449272.md",
+          "canDelete": true
+        },
+        {
+          "name": "1678012450206.md",
+          "canDelete": true
+        }
+      ]
+    },
+    {
+      "name": "test.     ",
+      "canDelete": true,
+      "icon": "icon-shuben",
+      "children": [
+        {
+          "name": "1677995656536.md",
+          "canDelete": true
+        },
+        {
+          "name": "1678011956406.md",
+          "canDelete": true
+        },
+        {
+          "name": "1678011957388.md",
+          "canDelete": true
+        },
+        {
+          "name": "1678011961023.md",
+          "canDelete": true
+        }
+      ]
+    },
+    {
+      "name": "1",
+      "canDelete": true,
+      "icon": "icon-shuben",
+      "children": [
+        {
+          "name": "1678012064822.md",
+          "canDelete": true
+        },
+        {
+          "name": "1678012067038.md",
+          "canDelete": true
+        },
+        {
+          "name": "1678012088789.md",
+          "canDelete": true
+        },
+        {
+          "name": "1678012100120.md",
+          "canDelete": true
+        },
+        {
+          "name": "1678012467206.md",
+          "canDelete": true
+        },
+        {
+          "name": "1678012468523.md",
+          "canDelete": true
+        }
+      ]
+    },
+    {
+      "name": "1212",
+      "canDelete": true,
+      "icon": "icon-shuben",
+      "children": [
+        {
+          "name": "1678012357771.md",
+          "canDelete": true
+        },
+        {
+          "name": "1678012360972.md",
+          "canDelete": true
+        }
+      ]
+    },
+    {
+      "name": "3",
+      "canDelete": true,
+      "icon": "icon-shuben",
+      "children": [
+        {
+          "name": "1678012509672.md",
+          "canDelete": true
+        },
+        {
+          "name": "1678012510105.md",
+          "canDelete": true
+        },
+        {
+          "name": "1678012512673.md",
+          "canDelete": true
+        }
+      ]
+    },
+    {
+      "name": "4",
+      "canDelete": true,
+      "icon": "icon-shuben",
+      "children": [
+        {
+          "name": "1678012110989.md",
+          "canDelete": true
+        },
+        {
+          "name": "1678012111620.md",
+          "canDelete": true
+        }
+      ]
+    },
+    {
+      "name": "5",
+      "canDelete": true,
+      "icon": "icon-shuben",
+      "children": [
+        {
+          "name": "1678012252372.md",
+          "canDelete": true
+        },
+        {
+          "name": "1678012253106.md",
+          "canDelete": true
+        },
+        {
+          "name": "1678012254838.md",
+          "canDelete": true
+        },
+        {
+          "name": "1678012383056.md",
+          "canDelete": true
+        }
+      ]
+    },
+    {
+      "name": "7",
+      "canDelete": true,
+      "icon": "icon-shuben",
+      "children": [
+        {
+          "name": "1678012158574.md",
+          "canDelete": true
+        },
+        {
+          "name": "1678012159305.md",
+          "canDelete": true
+        },
+        {
+          "name": "1678012161738.md",
+          "canDelete": true
+        }
+      ]
+    },
+    {
+      "name": "8",
+      "canDelete": true,
+      "icon": "icon-shuben"
+    },
+    {
+      "name": "9",
+      "canDelete": true,
+      "icon": "icon-shuben"
+    },
+    {
+      "name": "10",
+      "canDelete": true,
+      "icon": "icon-shuben"
+    },
+    {
+      "name": "1234567890987654321",
+      "canDelete": true,
+      "icon": "icon-shuben"
+    }
+  ]
+}
