@@ -4,7 +4,7 @@
       <span class="shouqi iconfont icon-jiantou_xiangzuoliangci" @click="toggleLeft"></span>
     </div>
     <transition-group name="list" mode="fade-in">
-      <div class="left-nav" v-if="state.showLeft">
+      <div key="leftNav" class="left-nav" v-if="state.showLeft">
         <div class="option-bar" @contextmenu="onContextMenu($event)">
           <div class="add-bar-group border-bottom">
             <BarItem icon="icon-plus" name="新建文稿" />
@@ -36,8 +36,8 @@
             />
           </div>
         </div>
-        <div class="add-list">
-          <Docitem @click="addDoc" />
+        <div class="add-list" @contextmenu.stop="onContextDocMenu($event)">
+          <Docitem @click="addDoc" v-if="showDocItem" />
           <Docitem
             v-for="item in state.fileList"
             :key="item.name"
@@ -45,11 +45,12 @@
             :docData="item"
             :selectdoc="state.selectdoc"
             :activeItem="state.activeItem"
+            @contextmenu.stop="onContextDocMenu($event, item)"
             @click="setSelectDoc(item)"
           />
         </div>
       </div>
-      <section class="right-content" :class="[state.showLeft ? '' : 'maxWidth']">
+      <section key="rightContent" class="right-content" :class="[state.showLeft ? '' : 'maxWidth']">
         <RouterView />
       </section>
     </transition-group>
@@ -90,6 +91,10 @@ const createDoc = (name: string) => {
 };
 const deleteDoc = (item: any) => {
   $utils.deleteJsonAndFolder(initdb, item.name);
+  if (state.activeItem === item.name) {
+    state.activeItem = "";
+    state.fileList = ref([]);
+  }
   getFolderList();
 };
 
@@ -136,6 +141,9 @@ watch(
 const confirmDisabled = computed(() => {
   return !state.folderValue.trim()?.length;
 });
+const showDocItem = computed(() => {
+  return !state.fileList.length && state.activeItem && !["全部", "搜索", "废纸篓"].includes(state.activeItem);
+});
 const onContextMenu = (e: MouseEvent) => {
   e.preventDefault();
   state.optionsData.x = e.x;
@@ -151,7 +159,19 @@ const onContextBarMenu = (e: MouseEvent, item: any) => {
   state.menuItem = [...state.defaultMenuItem, { label: "删除", fun: () => deleteDoc(item) }];
   state.rightShow = true;
 };
-
+const onContextDocMenu = (e: MouseEvent, item = null) => {
+  e.preventDefault();
+  state.optionsData.x = e.x;
+  state.optionsData.y = e.y;
+  state.menuItem = [{ label: "新建文稿", fun: addDoc }];
+  if (item) {
+    state.menuItem.push({
+      label: "删除文稿",
+      fun: () => delDoc(item)
+    });
+  }
+  state.rightShow = true;
+};
 const setShow = (val: boolean) => {
   state.rightShow = val;
 };
@@ -166,7 +186,6 @@ const setActiveItem: Function = (name: string) => {
 };
 const toggleLeft: any = () => {
   state.showLeft = !state.showLeft;
-  console.log(route.query, route.path);
   router.push({
     path: route.path,
     query: {
@@ -177,18 +196,18 @@ const toggleLeft: any = () => {
 };
 // 添加文件
 const addDoc: any = () => {
-  const docName = `${new Date().getTime()}.md`;
-  initdb.createDoc(`doc/${state.activeItem}/${docName}`);
-  initdb.getData((db: any) => {
-    const userList = db.get("userList").find({ name: state.activeItem });
-    const children = userList.value()?.children || [];
-    children.push({ name: docName, canDelete: true });
-    userList.set("children", children).write();
-    state.fileList.push({ name: docName, canDelete: true });
-    if (!state.setSelectDoc?.name) {
-      state.selectdoc = state.fileList?.length ? state.fileList[0] : null;
-    }
-  });
+  $utils.addJsonAndFile(initdb, state.activeItem);
+  getFileList();
+};
+// 删除文件
+const delDoc: any = (item: any) => {
+  const { name, canDelete } = item;
+  if (!canDelete) return;
+  $utils.deleteJSONAndFile(initdb, state.activeItem, name);
+  if (name === state.selectdoc?.name) {
+    state.selectdoc = null;
+  }
+  getFileList();
 };
 const setSelectDoc = (doc: any) => {
   state.selectdoc = doc;
@@ -197,16 +216,17 @@ const getFileList: Function = () => {
   initdb.getData((db: any) => {
     const userList = db.get("userList").find({ name: state.activeItem });
     const children = userList.value()?.children || [];
-    state.fileList = children;
-    console.log("children", state.fileList);
+    state.fileList = ref(children);
   });
-  if (!state.setSelectDoc?.name) {
+  console.log("state.setSelectDoc", state.setSelectDoc);
+  if (!state.selectdoc?.name) {
     state.selectdoc = state.fileList?.length ? state.fileList[0] : null;
   }
 };
 const getFolderList: Function = () => {
   initdb.getData((db: any) => {
-    state.userList = db.get("userList").value();
+    state.userList = [];
+    state.userList = ref(db.get("userList").value());
   });
 };
 const handleConfirm = () => {

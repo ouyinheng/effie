@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts">
-import { ref, onMounted, defineComponent, onDeactivated, watch } from "vue";
+import { ref, onMounted, defineComponent, onDeactivated, watch, reactive } from "vue";
 import Vditor from "vditor";
 import "vditor/dist/index.css";
 export default defineComponent({
@@ -21,27 +21,30 @@ export default defineComponent({
     }
   },
   setup(props, { emit }) {
-    const vditor = ref<Vditor | null>(null);
+    const state: any = reactive({
+      vditor: Vditor || null,
+      setTimeout: null
+    });
     const saveDocData = () => {
-      emit("saveDocData", vditor.value!.getValue());
+      if (state.setTimeout) clearTimeout(state.setTimeout);
+      state.setTimeout = setTimeout(() => {
+        emit("saveDocData", state.vditor.getValue());
+      }, 500);
     };
     window.addEventListener("keyup", saveDocData);
     watch(
       () => props.editorValue,
       () => {
-        vditor.value!.setValue(props.editorValue);
+        state.vditor.setValue(props.editorValue);
       }
     );
     onMounted(() => {
-      vditor.value = new Vditor("vditor", {
+      state.vditor = new Vditor("vditor", {
         mode: "ir",
-
         after: () => {
-          // vditor.value is a instance of Vditor now and thus can be safely used here
-          vditor.value!.setValue(props.editorValue);
+          state.vditor.setValue(props.editorValue);
         }
       });
-      // vditor.value.setPreviewMode("both");
     });
     onDeactivated(() => {
       window.removeEventListener("keyup", saveDocData);

@@ -30,7 +30,6 @@ watch(
   () => $route.query,
   (newVal, oldVal) => {
     const { name, activeItem, preview } = $route.query;
-    console.log("test", String(preview));
     state.name = name;
     state.activeItem = activeItem;
     state.preview = String(preview);

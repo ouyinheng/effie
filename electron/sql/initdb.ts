@@ -3,17 +3,17 @@ const low = require("lowdb");
 const path = require("path");
 const FileSync = require("lowdb/adapters/FileSync");
 let db: any = null;
-const href = process.env.NODE_ENV === "development" ? "" : `/Users/ouyinheng/Documents/`;
-const url = process.env.NODE_ENV === "development" ? "effieFolder/lib/" : `/Users/ouyinheng/Documents/effieFolder/lib/`;
-// Set some defaults
+const saveFileUrlHandler = (url: String) => (localStorage.saveFileUrl || "") + "/" + url;
+const urlHanlder = () => (localStorage.saveFileUrl || "") + "/effieFolder/lib/";
+
 export default {
   init(filename: string) {
     if (process.env.NODE_ENV === "production") {
-      global.__lib = path.join(__dirname, href + "/effieFolder");
+      global.__lib = path.join(__dirname, saveFileUrlHandler("effieFolder"));
     }
     this.createFile();
 
-    const adapter = new FileSync(url + filename);
+    const adapter = new FileSync(urlHanlder() + filename);
     db = low(adapter);
     db.defaults({
       barList: [
@@ -28,25 +28,28 @@ export default {
     }).write();
   },
   createFile(name = "lib") {
-    if (!fs.existsSync(href + "effieFolder")) fs.mkdirSync(href + "effieFolder");
-    if (!fs.existsSync(href + "effieFolder/doc")) fs.mkdirSync(href + "effieFolder/doc");
-    if (fs.existsSync(href + `effieFolder/${name}`)) {
+    if (!fs.existsSync(saveFileUrlHandler("effieFolder"))) fs.mkdirSync(saveFileUrlHandler("effieFolder"));
+    if (!fs.existsSync(saveFileUrlHandler("effieFolder/doc"))) fs.mkdirSync(saveFileUrlHandler("effieFolder/doc"));
+    if (fs.existsSync(saveFileUrlHandler(`effieFolder/${name}`))) {
     } else {
-      fs.mkdirSync(href + `effieFolder/${name}`);
+      fs.mkdirSync(saveFileUrlHandler(`effieFolder/${name}`));
     }
   },
   createDoc(name: string, data = "") {
-    fs.writeFile(href + "effieFolder/" + name, data, (err: any) => {
+    fs.writeFile(saveFileUrlHandler("effieFolder/" + name), data, (err: any) => {
       if (err) {
         return console.error(err);
       }
     });
   },
   removeFolder(name: string) {
-    fs.rmdirSync(href + `effieFolder/${name}`);
+    fs.rmdirSync(saveFileUrlHandler(`effieFolder/${name}`));
+  },
+  removeFile(name: string) {
+    fs.unlinkSync(saveFileUrlHandler(`effieFolder/${name}`));
   },
   readDoc(name: string) {
-    const url = href + "effieFolder/" + name;
+    const url = saveFileUrlHandler("effieFolder/" + name);
     return fs.readFileSync(url, "utf-8");
   },
   getData(func: Function) {
