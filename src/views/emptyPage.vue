@@ -2,19 +2,28 @@
   <div class="empty-page flex-around flex-center">
     <div class="center-box">
       <span class="empty-tip">没有选中的文稿</span>
-      <div class="default-btn mt-10">新建文稿</div>
+      <div class="default-btn mt-10" v-if="showBtn" @click="addFile">新建文稿</div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { onMounted } from "vue";
+import { computed, onMounted, inject } from "vue";
 import initdb from "@elec/sql/initdb";
-initdb.createFile();
-initdb.init("setup.json");
+import { useCounterStore } from "@/stores/counter";
+const store: any = useCounterStore();
+const $utils: any = inject("$utils");
+
+const showBtn = computed(() => {
+  return store?.state?.activeItem && !["全部", "搜索", "废纸篓"].includes(store.state.activeItem);
+});
+// 事件
 const addFile = () => {
-  initdb.getData((db: any) => {});
+  $utils.addJsonAndFile(initdb, store.state.activeItem);
 };
+onMounted(() => {
+  initdb.init("setup.json");
+});
 </script>
 
 <style lang="less" scoped>

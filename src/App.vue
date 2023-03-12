@@ -9,7 +9,10 @@
     >
       <n-card style="width: 600px" :bordered="false" size="huge" role="dialog" aria-modal="true">
         <div>
-          <n-input v-model:value="state.saveFileUrl" type="text" placeholder="请输入文件的保存地址" />
+          <n-input-group>
+            <n-input v-model:value="state.saveFileUrl" readonly type="text" placeholder="请输入文件的保存地址" />
+            <n-button type="primary" ghost @click="showUpload"> 选择 </n-button>
+          </n-input-group>
         </div>
         <template #footer>
           <div class="footer">
@@ -22,12 +25,13 @@
   </div>
 </template>
 <script setup lang="ts">
-import loading from "naive-ui/es/_internal/loading";
-import { computed, reactive } from "vue";
+import { computed, reactive, ref } from "vue";
 import { RouterView } from "vue-router";
+const { ipcRenderer: ipc } = require("electron");
 const state = reactive({
   showModal: true,
-  saveFileUrl: ""
+  saveFileUrl: "",
+  inputValue: null
 });
 const btnDisabled = computed(() => {
   return !state.saveFileUrl;
@@ -37,9 +41,14 @@ const submitCallback = () => {
   window.global.saveFileUrl = localStorage.saveFileUrl;
   state.showModal = false;
 };
+const showUpload = async () => {
+  const res = await ipc.invoke("selectFolder");
+  console.log("window", res[0]);
+  state.saveFileUrl = res[0];
+};
 if (localStorage.saveFileUrl) {
   window.global.saveFileUrl = localStorage.saveFileUrl;
-  state.showModal = false;
+  state.showModal = true;
 }
 </script>
 <style lang="less" scoped>

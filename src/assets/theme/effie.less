@@ -1,0 +1,80 @@
+.effie {
+  * {
+    font-family: PingFangSC-Regular, sans-serif !important;
+  }
+  .before() {
+    &::before {
+      color: #c7c9ce !important;
+      font-weight: bold !important;
+    }
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: #3e8cc1 !important;
+    border: 0 !important;
+    .before();
+  }
+  strong {
+    font-size: 20px !important;
+    color: #ae427b;
+  }
+  em {
+    font-size: 20px !important;
+    color: #d29f38 !important;
+  }
+  s {
+    font-size: 20px !important;
+    color: #c4c2c2 !important;
+  }
+  code {
+    font-size: 20px !important;
+    background-color: #e4f1ec !important;
+    color: #408a7c !important;
+    .before();
+  }
+  blockquote {
+    font-size: 20px !important;
+    background-color: #e2eff8;
+    color: #65a3ce !important;
+    border: 0 !important;
+    border-radius: 5px;
+    padding: 5px !important;
+    .before();
+  }
+  a,
+  .vditor-ir__link {
+    font-size: 20px !important;
+    color: #3e8cc1;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  ul li {
+    font-size: 20px !important;
+    list-style: disc;
+    color: #666666;
+  }
+  ol li {
+    font-size: 20px !important;
+    list-style: inside decimal;
+    color: #666666;
+    &::marker {
+      color: #3e8cc1;
+    }
+  }
+  img {
+    font-size: 20px !important;
+    border-radius: 5px;
+  }
+  .katex .katex-html > .newline {
+    display: inline-block !important;
+  }
+  .vditor-panel.vditor-panel--none {
+    display: none !important;
+  }
+}

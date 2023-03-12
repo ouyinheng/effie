@@ -1,49 +1,54 @@
 <template>
   <div class="main-page">
-    <vditor @saveDocData="saveDocData" :preview="state.preview" :editorValue="state.editorValue" />
+    <vditor
+      v-if="state.showVditor"
+      @saveDocData="saveDocData"
+      :preview="state.preview"
+      :editorValue="state.editorValue"
+    />
+    <!-- <previewVditor></previewVditor> -->
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, watch } from "vue";
+import { computed, nextTick, onMounted, reactive, watch } from "vue";
 import { useRoute } from "vue-router";
 import vditor from "@/components/vditor.vue";
+import previewVditor from "@/components/previewVditor.vue";
 import initdb from "@elec/sql/initdb";
+import { useCounterStore } from "@/stores/counter";
 
 const $route = useRoute();
 const state: any = reactive({
   editorValue: "",
-  activeItem: null,
-  name: null,
+  showVditor: false,
   preview: "false"
 });
+const store: any = useCounterStore();
+
+// computed
+
 const saveDocData = (value: string) => {
-  initdb.createDoc(`doc/${state.activeItem}/${state.name}`, value);
+  initdb.createDoc(`doc/${store.state.activeItem}/${store.state.selectdoc.name}`, value);
 };
 const getDocData = () => {
-  if (!state.name || !state.activeItem) return;
-  const data = initdb.readDoc(`doc/${state.activeItem}/${state.name}`);
+  if (!store.state.selectdoc?.name || !store.state.activeItem) return;
+  const data = initdb.readDoc(`doc/${store.state.activeItem}/${store.state.selectdoc.name}`);
   state.editorValue = data;
+  state.showVditor = true;
 };
 
 watch(
-  () => $route.query,
-  (newVal, oldVal) => {
-    const { name, activeItem, preview } = $route.query;
-    state.name = name;
-    state.activeItem = activeItem;
-    state.preview = String(preview);
-    if (["搜索", "全部", "废纸篓"].includes(state.activeItem)) return;
+  () => store.state,
+  () => {
+    if (["搜索", "全部", "废纸篓"].includes(store.state.activeItem)) return;
     getDocData();
   },
-  {
-    immediate: true
-  }
+  { immediate: true, deep: true }
 );
 onMounted(() => {
-  const { name, activeItem } = $route.query;
-  state.name = name;
-  state.activeItem = activeItem;
+  const { preview } = $route.query;
+  state.preview = String(preview);
 });
 </script>
 

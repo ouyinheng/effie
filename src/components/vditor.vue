@@ -1,16 +1,31 @@
 <template>
-  <div class="vidtor-group">
+  <div
+    class="vidtor-group"
+    :class="{
+      effie: effieTheme
+    }"
+  >
     <div id="vditor" />
-    <div class="modal" v-if="preview === 'false'"></div>
   </div>
 </template>
 
 <script lang="ts">
-import { ref, onMounted, defineComponent, onDeactivated, watch, reactive } from "vue";
+import { ref, onMounted, defineComponent, onDeactivated, watch, reactive, computed } from "vue";
 import Vditor from "vditor";
 import "vditor/dist/index.css";
 export default defineComponent({
   props: {
+    editorConfig: {
+      type: Object,
+      default: () => ({
+        mode: "wysiwyg", // wysiwyg; ir; sv;
+        hide: false
+      })
+    },
+    effieTheme: {
+      type: Boolean,
+      default: true
+    },
     editorValue: {
       type: String,
       default: "Vue Composition API + Vditor + TypeScript Minimal Example"
@@ -20,7 +35,12 @@ export default defineComponent({
       default: "false"
     }
   },
-  setup(props, { emit }) {
+  watch: {
+    editorValue() {
+      this.state?.vditor.setValue(this.editorValue);
+    }
+  },
+  setup(props: any, { emit }) {
     const state: any = reactive({
       vditor: Vditor || null,
       setTimeout: null
@@ -32,24 +52,59 @@ export default defineComponent({
       }, 500);
     };
     window.addEventListener("keyup", saveDocData);
-    watch(
-      () => props.editorValue,
-      () => {
-        state.vditor.setValue(props.editorValue);
-      }
-    );
     onMounted(() => {
       state.vditor = new Vditor("vditor", {
-        mode: "ir",
+        mode: props.editorConfig?.mode,
         after: () => {
           state.vditor.setValue(props.editorValue);
-        }
+        },
+        toolbarConfig: {
+          hide: props.editorConfig.hide
+        },
+        toolbar: [
+          "emoji",
+          "headings",
+          "bold",
+          "italic",
+          "strike",
+          "link",
+          "|",
+          "list",
+          "ordered-list",
+          "check",
+          "outdent",
+          "indent",
+          "|",
+          "quote",
+          "line",
+          "code",
+          "inline-code",
+          "insert-before",
+          "insert-after",
+          "|",
+          "table",
+          "|",
+          "undo",
+          "redo",
+          "|",
+          "fullscreen",
+          "edit-mode",
+          {
+            name: "export",
+            tipPosition: "s",
+            tip: "导出",
+            className: "right",
+            click() {}
+          }
+        ]
       });
     });
     onDeactivated(() => {
       window.removeEventListener("keyup", saveDocData);
     });
-    return {};
+    return {
+      state
+    };
   }
 });
 </script>
@@ -60,23 +115,15 @@ export default defineComponent({
   width: 100% !important;
   height: 100% !important;
   position: relative;
-  .modal {
-    width: 100%;
-    height: 100%;
-    background-color: transparent;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-  }
 }
 #vditor {
   border: none;
   width: 100% !important;
   height: 100% !important;
   /deep/ .vditor-toolbar {
-    display: none !important;
+    // display: none !important;
+    padding: 20px 10px 0 !important;
+    background-color: white;
   }
   /deep/ .vditor-content {
     width: 100%;

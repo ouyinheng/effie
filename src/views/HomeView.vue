@@ -13,7 +13,7 @@
             <BarItem
               v-for="item in state.barList"
               :key="item.name"
-              :active="item.name === state.activeItem"
+              :active="item.name === store.state.activeItem"
               :icon="item.icon"
               :name="item.name"
               @click="setActiveItem(item.name)"
@@ -28,7 +28,7 @@
             <BarItem
               v-for="item in state.userList"
               :key="item.name"
-              :active="item.name === state.activeItem"
+              :active="item.name === store.state.activeItem"
               :icon="item.icon"
               :name="item.name"
               @click="setActiveItem(item.name)"
@@ -39,12 +39,12 @@
         <div class="add-list" @contextmenu.stop="onContextDocMenu($event)">
           <Docitem @click="addDoc" v-if="showDocItem" />
           <Docitem
-            v-for="item in state.fileList"
+            v-for="item in store.state.fileList"
             :key="item.name"
             :emptyBtn="false"
             :docData="item"
-            :selectdoc="state.selectdoc"
-            :activeItem="state.activeItem"
+            :selectdoc="store.state.selectdoc"
+            :activeItem="store.state.activeItem"
             @contextmenu.stop="onContextDocMenu($event, item)"
             @click="setSelectDoc(item)"
           />
@@ -81,51 +81,34 @@
 <script setup lang="ts">
 import { computed, inject, onDeactivated, onMounted, reactive, ref, watch } from "vue";
 import { RouterView, useRoute, useRouter } from "vue-router";
+import { useCounterStore } from "@/stores/counter";
 import BarItem from "@/components/barItem.vue";
 import Docitem from "@/components/docItem.vue";
 import RightMenu from "@/components/rightMenu.vue";
 import initdb from "@elec/sql/initdb";
 const $utils: any = inject("$utils");
-const createDoc = (name: string) => {
-  state.dialogVisible = true;
-};
-const deleteDoc = (item: any) => {
-  $utils.deleteJsonAndFolder(initdb, item.name);
-  if (state.activeItem === item.name) {
-    state.activeItem = "";
-    state.fileList = ref([]);
-  }
-  getFolderList();
-};
 
 const state: any = reactive({
-  activeItem: "全部",
   barList: [],
   userList: [], // 用户添加的文件夹
-  fileList: [],
-  selectdoc: null,
   optionsData: {},
   rightShow: false,
   dialogVisible: false,
   folderValue: "",
   newDocHeight: 200,
-  defaultMenuItem: [{ label: "新建文件夹", fun: createDoc }],
+  defaultMenuItem: [],
   menuItem: [],
   showLeft: true
 });
 let router = useRouter();
 let route = useRoute();
-
+const store: any = useCounterStore();
 watch(
-  () => state.selectdoc,
+  () => store.state.selectdoc,
   (newVal, oldVal) => {
-    if (state.selectdoc?.name) {
+    if (store.state.selectdoc?.name) {
       router.push({
-        path: "/home/mainPage",
-        query: {
-          name: state.selectdoc.name,
-          activeItem: state.activeItem
-        }
+        path: "/home/mainPage"
       });
     } else {
       router.push({
@@ -142,8 +125,27 @@ const confirmDisabled = computed(() => {
   return !state.folderValue.trim()?.length;
 });
 const showDocItem = computed(() => {
-  return !state.fileList.length && state.activeItem && !["全部", "搜索", "废纸篓"].includes(state.activeItem);
+  return (
+    !store.state.fileList.length &&
+    store.state.activeItem &&
+    !["全部", "搜索", "废纸篓"].includes(store.state.activeItem)
+  );
 });
+
+const createDoc = (name: string) => {
+  state.dialogVisible = true;
+};
+const deleteDoc = (item: any) => {
+  $utils.deleteJsonAndFolder(initdb, item.name);
+  if (store.state.activeItem === item.name) {
+    store.setActiveItem("");
+    store.setFileListData(ref([]));
+  }
+  getFolderList();
+};
+const setSelectDoc = (item: any) => {
+  store.setSelectDoc(item);
+};
 const onContextMenu = (e: MouseEvent) => {
   e.preventDefault();
   state.optionsData.x = e.x;
@@ -176,12 +178,12 @@ const setShow = (val: boolean) => {
   state.rightShow = val;
 };
 const initState: Function = () => {
-  state.selectdoc = null;
+  store.setSelectDoc(null);
 };
 const setActiveItem: Function = (name: string) => {
   initState();
   // 选择的文件夹
-  state.activeItem = name;
+  store.setActiveItem(name);
   getFileList();
 };
 const toggleLeft: any = () => {
@@ -196,31 +198,28 @@ const toggleLeft: any = () => {
 };
 // 添加文件
 const addDoc: any = () => {
-  $utils.addJsonAndFile(initdb, state.activeItem);
+  $utils.addJsonAndFile(initdb, store.state.activeItem);
   getFileList();
 };
 // 删除文件
 const delDoc: any = (item: any) => {
   const { name, canDelete } = item;
   if (!canDelete) return;
-  $utils.deleteJSONAndFile(initdb, state.activeItem, name);
-  if (name === state.selectdoc?.name) {
-    state.selectdoc = null;
+  $utils.deleteJSONAndFile(initdb, store.state.activeItem, name);
+  if (name === store.state.selectdoc?.name) {
+    store.setSelectDoc(null);
   }
   getFileList();
 };
-const setSelectDoc = (doc: any) => {
-  state.selectdoc = doc;
-};
 const getFileList: Function = () => {
   initdb.getData((db: any) => {
-    const userList = db.get("userList").find({ name: state.activeItem });
+    const userList = db.get("userList").find({ name: store.state.activeItem });
     const children = userList.value()?.children || [];
-    state.fileList = ref(children);
+    store.setFileListData(ref(children));
   });
-  console.log("state.setSelectDoc", state.setSelectDoc);
-  if (!state.selectdoc?.name) {
-    state.selectdoc = state.fileList?.length ? state.fileList[0] : null;
+  if (!store.state.selectdoc?.name) {
+    const selectdoc = store.state.fileList?.length ? store.state.fileList[0] : null;
+    store.setSelectDoc(selectdoc);
   }
 };
 const getFolderList: Function = () => {
@@ -255,6 +254,7 @@ onMounted(() => {
       initdb.createFile("doc/" + folder.name);
     });
   });
+  state.defaultMenuItem.push({ label: "新建文件夹", fun: createDoc });
   onResizeHandler();
   window.addEventListener("resize", onResizeHandler);
 });

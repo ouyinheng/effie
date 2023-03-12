@@ -4,6 +4,9 @@ import App from "./App.vue";
 import router from "./router";
 import naive from "naive-ui";
 import "@/assets/main.css";
+// 引入主题
+import "@/assets/theme/index.less";
+
 import "@imengyu/vue3-context-menu/lib/vue3-context-menu.css";
 import ContextMenu from "@imengyu/vue3-context-menu";
 import utils from "@/utils/utils";

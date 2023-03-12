@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu } = require("electron");
+const { app, BrowserWindow, Menu, ipcMain, dialog } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
@@ -13,10 +13,10 @@ const createWindow = () => {
     titleBarStyle: "hidden",
     webPreferences: {
       devTools: true,
-      //webSecurity: false, // 跨域问题 -> 打开注释
+      webSecurity: false, // 跨域问题 -> 打开注释
       contextIsolation: false, // false -> 可在渲染进程中使用electron的api，true->需要bridge.js(contextBridge)
-      nodeIntegration: true
-      //preload: path.join(appInfo.baseDir, 'preload', 'bridge.js'),
+      nodeIntegration: true,
+      preload: path.join(__dirname, "preload.js")
     },
     frame: true,
     show: true,
@@ -34,6 +34,19 @@ const createWindow = () => {
   }
 };
 
-app.whenReady().then(() => {
-  createWindow();
-});
+app
+  .whenReady()
+  .then(() => {
+    createWindow();
+  })
+  .then(() => {
+    ipcMain.handle("selectFolder", async (func) => {
+      const res = await dialog.showOpenDialogSync({
+        title: "请选择保存路径",
+        properties: ["openDirectory"],
+        createDirectory: true,
+        buttonLabel: "确定"
+      });
+      return res;
+    });
+  });

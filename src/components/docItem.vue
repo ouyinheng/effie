@@ -105,12 +105,24 @@ export default defineComponent({
       word-break: break-all;
     }
   }
+  /deep/ .vditor-sv.vditor-reset,
+  /deep/ .vditor-toolbar,
+  /deep/ .vditor-preview__action {
+    display: none !important;
+  }
 }
 .active {
   background-color: #3478f6;
   color: white;
   .empty-text {
     color: white !important;
+  }
+  /deep/ .vditor-reset {
+    background-color: #3478f6;
+    color: white !important;
+    & > * {
+      color: white !important;
+    }
   }
 }
 .add-icon-btn {
