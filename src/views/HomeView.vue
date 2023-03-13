@@ -2,6 +2,7 @@
   <div class="home-view">
     <div class="drag-bar">
       <span class="shouqi iconfont icon-jiantou_xiangzuoliangci" @click="toggleLeft"></span>
+      <span class="shouqi iconfont icon-shezhi" style="left: 95px" @click="goSetup"></span>
     </div>
     <transition-group name="list" mode="fade-in">
       <div key="leftNav" class="left-nav" v-if="state.showLeft">
@@ -237,6 +238,11 @@ const toggleLeft: any = () => {
     }
   });
 };
+const goSetup: any = () => {
+  router.push({
+    path: "/setup"
+  });
+};
 // 添加文件
 const addDoc: any = () => {
   $utils.addJsonAndFile(initdb, store.state.activeItem);
@@ -336,6 +342,9 @@ onDeactivated(() => {
         background-color: #d3d3d3;
         border-radius: 5px;
       }
+    }
+    .icon-shezhi {
+      font-weight: bold;
     }
   }
   .left-nav {

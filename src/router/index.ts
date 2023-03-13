@@ -27,6 +27,11 @@ const router = createRouter({
       ]
     },
     {
+      path: "/setup",
+      name: "setup",
+      component: () => import("@/views/setup.vue")
+    },
+    {
       path: "/rightMenu",
       name: "rightMenu",
       // route level code-splitting

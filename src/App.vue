@@ -21,7 +21,9 @@
         </template>
       </n-card>
     </n-modal>
-    <RouterView v-if="!state.showModal" />
+    <transition-group name="list" mode="fade-in">
+      <RouterView v-if="!state.showModal" />
+    </transition-group>
   </div>
 </template>
 <script setup lang="ts">
