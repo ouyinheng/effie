@@ -134,9 +134,12 @@ export default defineComponent({
       height: 100%;
       background-color: #ffffff;
     }
-    .vditor-ir pre.vditor-reset {
-      background-color: #ffffff;
-      .scrollMixins();
+    .vditor-ir,
+    .vditor-wysiwyg {
+      pre.vditor-reset {
+        background-color: #ffffff;
+        .scrollMixins();
+      }
     }
   }
 }

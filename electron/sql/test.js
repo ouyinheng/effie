@@ -6,7 +6,6 @@ let db = null;
 // Set some defaults
 export default {
   init(filename) {
-    console.log("filename", filename);
     if (process.env.NODE_ENV === "production") {
       global.__lib = path.join(__dirname, "./static");
     }

@@ -57,7 +57,8 @@ export default defineComponent({
 
     const getDocValue = () => {
       if (!props.docData?.name) return;
-      const data = initdb.readDoc(`doc/${props.activeItem}/${props.docData.name}`);
+      const activeItem = props.activeItem === "全部" ? props.docData.parent : props.activeItem;
+      const data = initdb.readDoc(`doc/${activeItem}/${props.docData.name}`);
       state.editorValue = data;
     };
     onMounted(() => {

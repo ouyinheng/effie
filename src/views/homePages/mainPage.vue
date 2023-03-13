@@ -27,13 +27,17 @@ const state: any = reactive({
 const store: any = useCounterStore();
 
 // computed
+const activeItem = computed(() => {
+  const activeItem = store.state.activeItem === "全部" ? store.state.selectdoc.parent : store.state.activeItem;
+  return activeItem;
+});
 
 const saveDocData = (value: string) => {
-  initdb.createDoc(`doc/${store.state.activeItem}/${store.state.selectdoc.name}`, value);
+  initdb.createDoc(`doc/${activeItem.value}/${store.state.selectdoc.name}`, value);
 };
 const getDocData = () => {
   if (!store.state.selectdoc?.name || !store.state.activeItem) return;
-  const data = initdb.readDoc(`doc/${store.state.activeItem}/${store.state.selectdoc.name}`);
+  const data = initdb.readDoc(`doc/${activeItem.value}/${store.state.selectdoc.name}`);
   state.editorValue = data;
   state.showVditor = true;
 };
@@ -41,7 +45,7 @@ const getDocData = () => {
 watch(
   () => store.state,
   () => {
-    if (["搜索", "全部", "废纸篓"].includes(store.state.activeItem)) return;
+    if (["搜索", "废纸篓"].includes(store.state.activeItem)) return;
     getDocData();
   },
   { immediate: true, deep: true }

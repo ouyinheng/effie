@@ -7,7 +7,7 @@
       <div key="leftNav" class="left-nav" v-if="state.showLeft">
         <div class="option-bar" @contextmenu="onContextMenu($event)">
           <div class="add-bar-group border-bottom">
-            <BarItem icon="icon-plus" name="新建文稿" />
+            <BarItem icon="icon-plus" name="新建文稿" @click="addFile" />
           </div>
           <div class="border-bottom default-bar pb-5">
             <BarItem
@@ -16,7 +16,7 @@
               :active="item.name === store.state.activeItem"
               :icon="item.icon"
               :name="item.name"
-              @click="setActiveItem(item.name)"
+              @click="sysBarClick(item)"
             />
           </div>
           <div
@@ -38,16 +38,18 @@
         </div>
         <div class="add-list" @contextmenu.stop="onContextDocMenu($event)">
           <Docitem @click="addDoc" v-if="showDocItem" />
-          <Docitem
-            v-for="item in store.state.fileList"
-            :key="item.name"
-            :emptyBtn="false"
-            :docData="item"
-            :selectdoc="store.state.selectdoc"
-            :activeItem="store.state.activeItem"
-            @contextmenu.stop="onContextDocMenu($event, item)"
-            @click="setSelectDoc(item)"
-          />
+          <transition-group name="list" mode="fade-in">
+            <Docitem
+              v-for="item in store.state.fileList"
+              :key="item.name"
+              :emptyBtn="false"
+              :docData="item"
+              :selectdoc="store.state.selectdoc"
+              :activeItem="store.state.activeItem"
+              @contextmenu.stop="onContextDocMenu($event, item)"
+              @click="setSelectDoc(item)"
+            />
+          </transition-group>
         </div>
       </div>
       <section key="rightContent" class="right-content" :class="[state.showLeft ? '' : 'maxWidth']">
@@ -86,6 +88,7 @@ import BarItem from "@/components/barItem.vue";
 import Docitem from "@/components/docItem.vue";
 import RightMenu from "@/components/rightMenu.vue";
 import initdb from "@elec/sql/initdb";
+import { fi } from "date-fns/locale";
 const $utils: any = inject("$utils");
 
 const state: any = reactive({
@@ -132,6 +135,44 @@ const showDocItem = computed(() => {
   );
 });
 
+// 事件
+const sysBarClick = (item: any) => {
+  setActiveItem(item.name);
+  switch (item.name) {
+    case "全部":
+      getAllFile();
+      break;
+    default:
+      break;
+  }
+};
+
+// 获取全部文件
+const getAllFile = () => {
+  initdb.getData((db: any) => {
+    const fileList: any[] = [];
+    const userList = db.get("userList").value();
+    userList.forEach((ele: any) => {
+      const list = ele?.children || [];
+      list.forEach((file: any) => (file.parent = ele.name));
+      fileList.push(...list);
+    });
+    store.setFileListData(fileList);
+    store.setSelectDoc(fileList[0]);
+  });
+};
+
+// 事件
+const addFile = () => {
+  let activeItem = store.state.activeItem;
+  if (["搜索", "全部", "废纸篓"].includes(activeItem)) {
+    activeItem = "文稿箱";
+    store.setActiveItem(activeItem);
+  }
+  $utils.addJsonAndFile(initdb, activeItem);
+  getFileList();
+};
+
 const createDoc = (name: string) => {
   state.dialogVisible = true;
 };
@@ -166,7 +207,7 @@ const onContextDocMenu = (e: MouseEvent, item = null) => {
   state.optionsData.x = e.x;
   state.optionsData.y = e.y;
   state.menuItem = [{ label: "新建文稿", fun: addDoc }];
-  if (item) {
+  if (item && store.state.activeItem !== "全部") {
     state.menuItem.push({
       label: "删除文稿",
       fun: () => delDoc(item)
@@ -255,6 +296,7 @@ onMounted(() => {
     });
   });
   state.defaultMenuItem.push({ label: "新建文件夹", fun: createDoc });
+  getAllFile();
   onResizeHandler();
   window.addEventListener("resize", onResizeHandler);
 });

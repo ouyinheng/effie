@@ -43,12 +43,11 @@ const submitCallback = () => {
 };
 const showUpload = async () => {
   const res = await ipc.invoke("selectFolder");
-  console.log("window", res[0]);
   state.saveFileUrl = res[0];
 };
 if (localStorage.saveFileUrl) {
   window.global.saveFileUrl = localStorage.saveFileUrl;
-  state.showModal = true;
+  state.showModal = false;
 }
 </script>
 <style lang="less" scoped>
