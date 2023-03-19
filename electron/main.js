@@ -1,7 +1,7 @@
 const { app, BrowserWindow, Menu, ipcMain, dialog } = require("electron");
 const path = require("path");
 const fs = require("fs");
-
+const exec = require("child_process").exec;
 const createWindow = () => {
   const win = new BrowserWindow({
     title: "Effie",
@@ -48,5 +48,27 @@ app
         buttonLabel: "确定"
       });
       return res;
+    });
+    ipcMain.handle("saveToGit", (e, str) => {
+      console.log("saveToGit", str);
+      let cmdpath = "/Users/ouyinheng/Documents/test/effieFolder";
+      // 子进程名称
+      let workerprocess;
+      runexec(str);
+      function runexec(cmdstr) {
+        workerprocess = exec(cmdstr, { cwd: cmdpath });
+        // 打印正常的后台可执行程序输出
+        workerprocess.stdout.on("data", function (data) {
+          console.log("stdout: " + data);
+        });
+        // 打印错误的后台可执行程序输出
+        workerprocess.stderr.on("data", function (data) {
+          console.log("stderr: " + data);
+        });
+        // 退出之后的输出
+        workerprocess.on("close", function (code) {
+          console.log("out code：" + code);
+        });
+      }
     });
   });

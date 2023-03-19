@@ -1,11 +1,16 @@
 <template>
   <context-menu v-model:show="show" :options="optionsComponent">
-    <context-menu-item
-      v-for="(item, index) in menuItem"
-      :key="index"
-      :label="showLabel(item)"
-      @click="alertContextMenuItemClicked(item)"
-    />
+    <template v-for="(item, index) in menuItem" :key="index">
+      <context-menu-group v-if="item.children" :label="showLabel(item)">
+        <context-menu-item
+          v-for="(ele, eleIndex) in item.children"
+          :key="eleIndex"
+          :label="showLabel(ele)"
+          @click="alertContextMenuItemClicked(ele)"
+        />
+      </context-menu-group>
+      <context-menu-item v-else :label="showLabel(item)" @click="alertContextMenuItemClicked(item)" />
+    </template>
   </context-menu>
 </template>
 
@@ -18,11 +23,15 @@ import {
   ContextMenuSeparator,
   ContextMenuItem
 } from "@imengyu/vue3-context-menu";
-
+interface MenuItem {
+  label: String;
+  fun?: Function;
+  children?: Array<MenuItem>;
+}
 export default defineComponent({
   props: {
     menuItem: {
-      type: Array,
+      type: Array<MenuItem>,
       default: () => []
     },
     options: {

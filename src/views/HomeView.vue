@@ -89,9 +89,9 @@ import BarItem from "@/components/barItem.vue";
 import Docitem from "@/components/docItem.vue";
 import RightMenu from "@/components/rightMenu.vue";
 import initdb from "@elec/sql/initdb";
-import { fi } from "date-fns/locale";
+import { menuEvent } from "./menu.mixins";
 const $utils: any = inject("$utils");
-
+const { exportImg } = menuEvent();
 const state: any = reactive({
   barList: [],
   userList: [], // 用户添加的文件夹
@@ -209,10 +209,16 @@ const onContextDocMenu = (e: MouseEvent, item = null) => {
   state.optionsData.y = e.y;
   state.menuItem = [{ label: "新建文稿", fun: addDoc }];
   if (item && store.state.activeItem !== "全部") {
-    state.menuItem.push({
-      label: "删除文稿",
-      fun: () => delDoc(item)
-    });
+    state.menuItem.push(
+      {
+        label: "删除文稿",
+        fun: () => delDoc(item)
+      },
+      {
+        label: "导出",
+        children: [{ label: "导出成图片", fun: () => exportImg(item) }]
+      }
+    );
   }
   state.rightShow = true;
 };
@@ -321,7 +327,6 @@ onDeactivated(() => {
   height: 100%;
   display: flex;
   position: relative;
-
   .drag-bar {
     width: 180px;
     height: 35px;
@@ -392,6 +397,7 @@ onDeactivated(() => {
     height: 100%;
     background-color: #fff;
     transition: all 0.3s ease;
+    box-sizing: border-box;
   }
   .maxWidth {
     width: 100% !important;

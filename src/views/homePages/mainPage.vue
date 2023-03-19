@@ -51,8 +51,8 @@ watch(
   { immediate: true, deep: true }
 );
 onMounted(() => {
-  const { preview } = $route.query;
-  state.preview = String(preview);
+  const preview = $route.query.preview;
+  if (preview) state.preview = String(preview);
 });
 </script>
 
@@ -60,7 +60,8 @@ onMounted(() => {
 .main-page {
   width: 100%;
   height: 100%;
-  padding: 20px 5px 10px 20px;
   box-sizing: border-box;
+  padding: 20px 5px 10px 20px;
+  -webkit-app-region: no-drag;
 }
 </style>

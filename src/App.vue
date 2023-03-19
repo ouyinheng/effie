@@ -60,12 +60,19 @@ if (localStorage.saveFileUrl) {
   overflow: hidden;
 }
 .save-dialog {
+  width: 500px !important;
+  height: 200px;
+  border-radius: 10px;
+  overflow: hidden;
   /deep/ .n-card__content {
     padding: 20px 20px;
   }
   /deep/ .n-card__footer {
     padding: 0 20px 10px;
   }
+}
+/deep/ .n-modal-mask {
+  background-color: pink !important;
 }
 /deep/ .footer {
   width: 100%;

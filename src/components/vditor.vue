@@ -10,9 +10,11 @@
 </template>
 
 <script lang="ts">
-import { ref, onMounted, defineComponent, onDeactivated, watch, reactive, computed } from "vue";
+import { onMounted, defineComponent, onDeactivated, reactive, watch } from "vue";
 import Vditor from "vditor";
 import "vditor/dist/index.css";
+import { useCounterStore } from "@/stores/counter";
+
 export default defineComponent({
   props: {
     editorConfig: {
@@ -36,8 +38,8 @@ export default defineComponent({
     }
   },
   watch: {
-    editorValue() {
-      this.state?.vditor.setValue(this.editorValue);
+    editorValue(val) {
+      if (this.state?.vditor) this.state?.vditor?.setValue(this.editorValue || "");
     }
   },
   setup(props: any, { emit }) {
@@ -45,14 +47,24 @@ export default defineComponent({
       vditor: Vditor || null,
       setTimeout: null
     });
+    const store: any = useCounterStore();
+    watch(
+      () => store.state.selectdoc,
+      () => {
+        try {
+          state?.vditor?.setValue(props.editorValue || "");
+        } catch (error) {}
+      },
+      { deep: true }
+    );
     const saveDocData = () => {
       if (state.setTimeout) clearTimeout(state.setTimeout);
       state.setTimeout = setTimeout(() => {
         emit("saveDocData", state.vditor.getValue());
       }, 500);
     };
-    window.addEventListener("keyup", saveDocData);
     onMounted(() => {
+      console.log("--3");
       state.vditor = new Vditor("vditor", {
         mode: props.editorConfig?.mode,
         after: () => {
@@ -98,9 +110,14 @@ export default defineComponent({
           }
         ]
       });
+      console.log("--4");
+      const vidtorGroup = document.querySelector(".vidtor-group");
+      console.log("--5");
+      if (vidtorGroup) vidtorGroup.addEventListener("keyup", saveDocData);
     });
     onDeactivated(() => {
-      window.removeEventListener("keyup", saveDocData);
+      const vidtorGroup = document.querySelector(".vidtor-group");
+      if (vidtorGroup) vidtorGroup.removeEventListener("keyup", saveDocData);
     });
     return {
       state

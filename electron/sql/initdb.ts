@@ -49,8 +49,12 @@ export default {
     fs.unlinkSync(saveFileUrlHandler(`effieFolder/${name}`));
   },
   readDoc(name: string) {
-    const url = saveFileUrlHandler("effieFolder/" + name);
-    return fs.readFileSync(url, "utf-8");
+    try {
+      const url = saveFileUrlHandler("effieFolder/" + name);
+      return fs.readFileSync(url, "utf-8");
+    } catch (error) {
+      this.createDoc(name, "");
+    }
   },
   getData(func: Function) {
     func(db);
