@@ -2,10 +2,17 @@
   <div class="home-view">
     <div class="drag-bar">
       <span class="shouqi iconfont icon-jiantou_xiangzuoliangci" @click="toggleLeft"></span>
-      <span class="shouqi iconfont icon-shezhi" style="left: 95px" @click="goSetup"></span>
+      <span class="shouqi iconfont icon-shezhi" style="left: 95px" @click="showSetupDialog"></span>
+      <span
+        class="shouqi iconfont icon-yunpan"
+        style="left: 125px"
+        @click="goOthrePage('picture')"
+      ></span>
     </div>
     <transition-group name="list" mode="fade-in">
       <div key="leftNav" class="left-nav" v-if="state.showLeft">
+        <ToolBar></ToolBar>
+
         <div class="option-bar" @contextmenu="onContextMenu($event)">
           <div class="add-bar-group border-bottom">
             <BarItem icon="icon-plus" name="新建文稿" @click="addFile" />
@@ -58,26 +65,15 @@
       </section>
     </transition-group>
 
-    <RightMenu :value="state.rightShow" :options="state.optionsData" :menuItem="state.menuItem" @setShow="setShow">
-    </RightMenu>
-    <n-modal
-      v-model:show="state.dialogVisible"
-      :mask-closable="false"
-      :closable="false"
-      :show-icon="false"
-      preset="dialog"
-      title="请输入文件名"
-      content="你确认"
-      positive-text="确认"
-      negative-text="算了"
-      :positive-button-props="{ disabled: confirmDisabled }"
-      @positive-click="handleConfirm"
-      @negative-click="handleClose"
+    <RightMenu
+      :value="state.rightShow"
+      :options="state.optionsData"
+      :menuItem="state.menuItem"
+      @setShow="setShow"
     >
-      <div>
-        <n-input v-model:value.trim="state.folderValue" type="text" placeholder="请输入文件名" />
-      </div>
-    </n-modal>
+    </RightMenu>
+    <AddFolder :value="state.dialogVisible" @confirm="addFolderConfirm"></AddFolder>
+    <Setup :value="state.showSetUpDialog" @setValue="setSetupValue"></Setup>
   </div>
 </template>
 
@@ -88,6 +84,9 @@ import { useCounterStore } from "@/stores/counter";
 import BarItem from "@/components/barItem.vue";
 import Docitem from "@/components/docItem.vue";
 import RightMenu from "@/components/rightMenu.vue";
+import ToolBar from "@/components/toolbar.vue";
+import Setup from "@/views/setup/index.vue";
+import AddFolder from "@/views/homePages/AddFolder.vue";
 import initdb from "@elec/sql/initdb";
 import { menuEvent } from "./menu.mixins";
 const $utils: any = inject("$utils");
@@ -102,7 +101,8 @@ const state: any = reactive({
   newDocHeight: 200,
   defaultMenuItem: [],
   menuItem: [],
-  showLeft: true
+  showLeft: true,
+  showSetUpDialog: false
 });
 let router = useRouter();
 let route = useRoute();
@@ -125,9 +125,7 @@ watch(
   }
 );
 // computed
-const confirmDisabled = computed(() => {
-  return !state.folderValue.trim()?.length;
-});
+
 const showDocItem = computed(() => {
   return (
     !store.state.fileList.length &&
@@ -135,6 +133,16 @@ const showDocItem = computed(() => {
     !["全部", "搜索", "废纸篓"].includes(store.state.activeItem)
   );
 });
+
+// 添加文件夹
+const addFolderConfirm = (folderValue: string) => {
+  state.dialogVisible = false;
+  if (!folderValue) {
+    return;
+  }
+  $utils.addJsonAndFolder(initdb, folderValue);
+  getFolderList();
+};
 
 // 事件
 const sysBarClick = (item: any) => {
@@ -148,6 +156,13 @@ const sysBarClick = (item: any) => {
   }
 };
 
+// 展示设置弹窗
+const showSetupDialog = () => {
+  state.showSetUpDialog = true;
+};
+const setSetupValue = (val: Boolean) => {
+  state.showSetUpDialog = val;
+};
 // 获取全部文件
 const getAllFile = () => {
   initdb.getData((db: any) => {
@@ -175,6 +190,7 @@ const addFile = () => {
 };
 
 const createDoc = (name: string) => {
+  console.log("new");
   state.dialogVisible = true;
 };
 const deleteDoc = (item: any) => {
@@ -244,9 +260,9 @@ const toggleLeft: any = () => {
     }
   });
 };
-const goSetup: any = () => {
+const goOthrePage: any = (path: string) => {
   router.push({
-    path: "/setup"
+    path: "/" + path
   });
 };
 // 添加文件
@@ -281,16 +297,7 @@ const getFolderList: Function = () => {
     state.userList = ref(db.get("userList").value());
   });
 };
-const handleConfirm = () => {
-  if (!state.folderValue) return;
-  $utils.addJsonAndFolder(initdb, state.folderValue);
-  getFolderList();
-  handleClose();
-};
-const handleClose = () => {
-  state.folderValue = "";
-  state.dialogVisible = false;
-};
+
 const onResizeHandler = () => {
   const optionBar = document.querySelector(".option-bar")?.clientHeight || 0;
   const addBarGroup = document.querySelector(".add-bar-group")?.clientHeight || 0;

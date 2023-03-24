@@ -181,10 +181,19 @@ q:after {
 }
 .mx-context-menu-item {
   background-color: #e2e5e5;
-  padding: 5px !important;
+  padding: 0px !important;
 }
 .mx-context-menu-item:hover {
   color: white !important;
   background-color: #3478f6 !important;
   border-radius: 5px;
+}
+.mx-context-menu-item.open {
+  color: white !important;
+  background-color: #3478f6 !important;
+  border-radius: 5px;
+}
+.mx-context-menu-item.open .mx-checked-mark,
+.mx-context-menu-item.open .mx-right-arrow {
+  fill: white !important;
 }

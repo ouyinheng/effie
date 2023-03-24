@@ -1,51 +1,21 @@
 <template>
   <div class="home-page">
-    <n-modal
-      class="save-dialog"
-      v-model:show="state.showModal"
-      :mask-closable="false"
-      :close-on-esc="false"
-      :auto-focus="false"
-    >
-      <n-card style="width: 600px" :bordered="false" size="huge" role="dialog" aria-modal="true">
-        <div>
-          <n-input-group>
-            <n-input v-model:value="state.saveFileUrl" readonly type="text" placeholder="请输入文件的保存地址" />
-            <n-button type="primary" ghost @click="showUpload"> 选择 </n-button>
-          </n-input-group>
-        </div>
-        <template #footer>
-          <div class="footer">
-            <n-button type="primary" :disabled="btnDisabled" @click="submitCallback"> 确定 </n-button>
-          </div>
-        </template>
-      </n-card>
-    </n-modal>
+    <select-folder :value="state.showModal" @start="start"></select-folder>
     <transition-group name="list" mode="fade-in">
       <RouterView v-if="!state.showModal" />
     </transition-group>
   </div>
 </template>
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue";
+import { reactive } from "vue";
 import { RouterView } from "vue-router";
-const { ipcRenderer: ipc } = require("electron");
+import SelectFolder from "./SelectFolder.vue";
 const state = reactive({
-  showModal: true,
-  saveFileUrl: "",
-  inputValue: null
+  showModal: true
 });
-const btnDisabled = computed(() => {
-  return !state.saveFileUrl;
-});
-const submitCallback = () => {
-  localStorage.saveFileUrl = state.saveFileUrl;
-  window.global.saveFileUrl = localStorage.saveFileUrl;
+
+const start = () => {
   state.showModal = false;
-};
-const showUpload = async () => {
-  const res = await ipc.invoke("selectFolder");
-  state.saveFileUrl = res[0];
 };
 if (localStorage.saveFileUrl) {
   window.global.saveFileUrl = localStorage.saveFileUrl;

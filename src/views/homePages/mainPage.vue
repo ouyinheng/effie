@@ -1,6 +1,7 @@
 <template>
   <div class="main-page">
     <vditor
+      ref="vditorRef"
       v-if="state.showVditor"
       @saveDocData="saveDocData"
       :preview="state.preview"
@@ -11,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, reactive, watch } from "vue";
+import { computed, ref, onMounted, reactive, watch } from "vue";
 import { useRoute } from "vue-router";
 import vditor from "@/components/vditor.vue";
 import previewVditor from "@/components/previewVditor.vue";
@@ -24,6 +25,7 @@ const state: any = reactive({
   showVditor: false,
   preview: "false"
 });
+const vditorRef = ref();
 const store: any = useCounterStore();
 
 // computed

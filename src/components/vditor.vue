@@ -1,16 +1,30 @@
 <template>
+  <div class="more-bar">
+    <a-dropdown>
+      <span class="iconfont icon-xuanxiang"></span>
+      <template #content>
+        <a-doption @click="togglePreview">
+          <template #icon>
+            <span class="iconfont icon-chakan"></span>
+          </template>
+          <template #default>只读</template>
+        </a-doption>
+      </template>
+    </a-dropdown>
+  </div>
   <div
     class="vidtor-group"
     :class="{
       effie: effieTheme
     }"
   >
-    <div id="vditor" />
+    <div class="vditor-preview" v-if="state.showPreview" v-html="state.previewHtml"></div>
+    <div v-else id="vditor" />
   </div>
 </template>
 
 <script lang="ts">
-import { onMounted, defineComponent, onDeactivated, reactive, watch } from "vue";
+import { onMounted, defineComponent, onDeactivated, reactive, ref, watch, nextTick } from "vue";
 import Vditor from "vditor";
 import "vditor/dist/index.css";
 import { useCounterStore } from "@/stores/counter";
@@ -45,7 +59,16 @@ export default defineComponent({
   setup(props: any, { emit }) {
     const state: any = reactive({
       vditor: Vditor || null,
-      setTimeout: null
+      setTimeout: null,
+      showPreview: false,
+      previewHtml: "",
+      morevalue: "",
+      moreOptions: [
+        {
+          label: "只读",
+          value: "preview"
+        }
+      ]
     });
     const store: any = useCounterStore();
     watch(
@@ -57,18 +80,36 @@ export default defineComponent({
       },
       { deep: true }
     );
+    watch(
+      () => state.showPreview,
+      (val) => {
+        console.log("val", val);
+        if (!val) {
+          nextTick(() => {
+            renderVditor();
+          });
+        }
+      }
+    );
     const saveDocData = () => {
       if (state.setTimeout) clearTimeout(state.setTimeout);
       state.setTimeout = setTimeout(() => {
+        state.previewHtml = state.vditor.getHTML();
         emit("saveDocData", state.vditor.getValue());
       }, 500);
     };
-    onMounted(() => {
-      console.log("--3");
+
+    const togglePreview = () => {
+      state.showPreview = ref(!state.showPreview);
+    };
+
+    const renderVditor = () => {
+      console.log("test");
       state.vditor = new Vditor("vditor", {
         mode: props.editorConfig?.mode,
         after: () => {
           state.vditor.setValue(props.editorValue);
+          state.previewHtml = state.vditor.getHTML();
         },
         toolbarConfig: {
           hide: props.editorConfig.hide
@@ -99,39 +140,57 @@ export default defineComponent({
           "undo",
           "redo",
           "|",
-          "fullscreen",
-          "edit-mode",
-          {
-            name: "export",
-            tipPosition: "s",
-            tip: "导出",
-            className: "right",
-            click() {}
-          }
+          "fullscreen"
         ]
       });
-      console.log("--4");
       const vidtorGroup = document.querySelector(".vidtor-group");
-      console.log("--5");
       if (vidtorGroup) vidtorGroup.addEventListener("keyup", saveDocData);
+    };
+
+    onMounted(() => {
+      renderVditor();
     });
     onDeactivated(() => {
       const vidtorGroup = document.querySelector(".vidtor-group");
       if (vidtorGroup) vidtorGroup.removeEventListener("keyup", saveDocData);
     });
     return {
-      state
+      state,
+      togglePreview,
+      renderVditor
     };
   }
 });
 </script>
 
 <style lang="less" scoped>
+.more-bar {
+  width: 100px;
+  height: 20px;
+  position: fixed;
+  right: -50px;
+  top: 15px;
+  z-index: 999;
+  .icon-xuanxiang {
+    font-size: 16px;
+    color: black;
+    cursor: pointer;
+  }
+}
 .vidtor-group {
   border: none;
   width: 100% !important;
   height: 100% !important;
   position: relative;
+  .hide {
+    opacity: 0;
+  }
+}
+.vditor-preview {
+  width: 100% !important;
+  height: 100% !important;
+  .scrollMixins();
+  overflow: auto;
 }
 #vditor {
   border: none;

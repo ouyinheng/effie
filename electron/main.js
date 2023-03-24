@@ -22,6 +22,7 @@ const createWindow = () => {
     show: true,
     icon: path.join(__dirname, "public", "images", "logo-32.png")
   });
+  win.setMenu(null);
   if (app.isPackaged) {
     // win.webContents.openDevTools();
     console.log("现在是打包后的");
