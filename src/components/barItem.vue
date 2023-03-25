@@ -5,8 +5,11 @@
       'active-item': active
     }"
   >
-    <span class="iconfont" :class="[icon]"></span>
-    <span class="name ml-5">{{ name }}</span>
+    <span v-if="icon" class="iconfont" :class="[icon]"></span>
+    <span class="name ml-5">
+      <span>{{ name }}</span>
+      <a-spin v-show="loading" />
+    </span>
   </div>
 </template>
 
@@ -17,7 +20,8 @@ export default defineComponent({
   props: {
     name: String,
     active: Boolean,
-    icon: String
+    icon: String,
+    loading: Boolean
   },
   setup(props, contex) {
     // console.log("---", props);
@@ -35,6 +39,9 @@ export default defineComponent({
   margin-bottom: 5px;
   box-sizing: border-box;
   user-select: none;
+  .arco-spin-icon {
+    line-height: 20px;
+  }
   span.name {
     text-overflow: ellipsis;
     overflow: hidden;

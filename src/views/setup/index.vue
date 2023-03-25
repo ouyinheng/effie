@@ -14,13 +14,17 @@
       <n-tab-pane name="huaban" tab="花瓣"> </n-tab-pane>
       <n-tab-pane name="zhanwei" tab="占位"> </n-tab-pane>
     </n-tabs>
-    <github v-if="activeTab === 'Github'"></github>
+    <github v-if="activeTab === 'Github' && showModal"></github>
+    <template #footer>
+      <a-button @click="onAfterLeave">关闭</a-button>
+    </template>
   </a-modal>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, onMounted, ref } from "vue";
 import github from "./github.vue";
+import setupdb from "@elec/sql/setup";
 export default defineComponent({
   props: {
     value: {
@@ -47,6 +51,10 @@ export default defineComponent({
     };
     // 确认
     const handleOk = () => {};
+
+    onMounted(() => {
+      setupdb.init("option.json");
+    });
     return {
       showModal,
       activeTab,

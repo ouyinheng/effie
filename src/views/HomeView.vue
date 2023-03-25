@@ -2,17 +2,10 @@
   <div class="home-view">
     <div class="drag-bar">
       <span class="shouqi iconfont icon-jiantou_xiangzuoliangci" @click="toggleLeft"></span>
-      <span class="shouqi iconfont icon-shezhi" style="left: 95px" @click="showSetupDialog"></span>
-      <span
-        class="shouqi iconfont icon-yunpan"
-        style="left: 125px"
-        @click="goOthrePage('picture')"
-      ></span>
     </div>
     <transition-group name="list" mode="fade-in">
       <div key="leftNav" class="left-nav" v-if="state.showLeft">
         <ToolBar></ToolBar>
-
         <div class="option-bar" @contextmenu="onContextMenu($event)">
           <div class="add-bar-group border-bottom">
             <BarItem icon="icon-plus" name="新建文稿" @click="addFile" />
@@ -42,6 +35,25 @@
               @click="setActiveItem(item.name)"
               @contextmenu.stop="onContextBarMenu($event, item)"
             />
+          </div>
+          <div class="more-options border-top">
+            <a-dropdown @select="handleSelect" :popup-max-height="false">
+              <BarItem :loading="state.loading" name="更多操作" />
+              <template #content>
+                <a-doption @click="showSetupDialog">
+                  <icon-settings class="shouqi" style="left: 95px" />
+                  <span class="dop-text">设置</span>
+                </a-doption>
+                <a-doption @click="goOthrePage('picture')">
+                  <icon-image class="shouqi iconfont icon-yunpan" style="left: 120px" />
+                  <span class="dop-text">图片</span>
+                </a-doption>
+                <a-doption @click="refresh">
+                  <icon-refresh />
+                  <span class="dop-text">同步</span>
+                </a-doption>
+              </template>
+            </a-dropdown>
           </div>
         </div>
         <div class="add-list" @contextmenu.stop="onContextDocMenu($event)">
@@ -78,7 +90,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, onDeactivated, onMounted, reactive, ref, watch } from "vue";
+import { computed, inject, nextTick, onDeactivated, onMounted, reactive, ref, watch } from "vue";
 import { RouterView, useRoute, useRouter } from "vue-router";
 import { useCounterStore } from "@/stores/counter";
 import BarItem from "@/components/barItem.vue";
@@ -88,7 +100,11 @@ import ToolBar from "@/components/toolbar.vue";
 import Setup from "@/views/setup/index.vue";
 import AddFolder from "@/views/homePages/AddFolder.vue";
 import initdb from "@elec/sql/initdb";
+import setupdb from "@elec/sql/setup";
 import { menuEvent } from "./menu.mixins";
+import { Message } from "@arco-design/web-vue";
+
+const { ipcRenderer: ipc } = require("electron");
 const $utils: any = inject("$utils");
 const { exportImg } = menuEvent();
 const state: any = reactive({
@@ -102,7 +118,8 @@ const state: any = reactive({
   defaultMenuItem: [],
   menuItem: [],
   showLeft: true,
-  showSetUpDialog: false
+  showSetUpDialog: false,
+  loading: false
 });
 let router = useRouter();
 let route = useRoute();
@@ -163,6 +180,36 @@ const showSetupDialog = () => {
 const setSetupValue = (val: Boolean) => {
   state.showSetUpDialog = val;
 };
+// 同步
+const refresh = async () => {
+  try {
+    state.loading = true;
+    let res = await ipc.invoke("saveToGit", "git pull origin main");
+    console.log("res1", res);
+    if (res?.error) return;
+    res = await ipc.invoke("saveToGit", "git add *");
+    console.log("res2", res);
+    if (res?.error) return;
+    const year = new Date().getFullYear();
+    const month = new Date().getMonth() + 1;
+    const day = new Date().getDay();
+    res = await ipc.invoke("saveToGit", `git commit -m '${year + "" + month + "" + day}更新'`);
+    console.log("res3", res);
+    if (res?.error) {
+      throw new Error();
+    }
+    res = await ipc.invoke("saveToGit", "git push origin main");
+    console.log("res4", res);
+    if (res?.error) {
+      throw new Error();
+    }
+    state.loading = false;
+    Message.success("同步成功");
+  } catch (error) {
+    state.loading = false;
+    Message.error("同步失败：可能为内容没有更改");
+  }
+};
 // 获取全部文件
 const getAllFile = () => {
   initdb.getData((db: any) => {
@@ -177,7 +224,7 @@ const getAllFile = () => {
     store.setSelectDoc(fileList[0]);
   });
 };
-
+const handleSelect = () => {};
 // 事件
 const addFile = () => {
   let activeItem = store.state.activeItem;
@@ -299,14 +346,16 @@ const getFolderList: Function = () => {
 };
 
 const onResizeHandler = () => {
+  console.log("--resize");
   const optionBar = document.querySelector(".option-bar")?.clientHeight || 0;
   const addBarGroup = document.querySelector(".add-bar-group")?.clientHeight || 0;
   const defaultBar = document.querySelector(".default-bar")?.clientHeight || 0;
-  state.newDocHeight = optionBar - addBarGroup - defaultBar - 80;
+  state.newDocHeight = optionBar - addBarGroup - defaultBar - 80 - 40;
 };
 // 获取左侧菜单
 onMounted(() => {
   initdb.init("setup.json");
+  setupdb.init("option.json");
   initdb.getData((db: any) => {
     state.barList = db.get("barList").value();
     state.userList = db.get("userList").value();
@@ -316,7 +365,9 @@ onMounted(() => {
   });
   state.defaultMenuItem.push({ label: "新建文件夹", fun: createDoc });
   getAllFile();
-  onResizeHandler();
+  setTimeout(() => {
+    onResizeHandler();
+  }, 400);
   window.addEventListener("resize", onResizeHandler);
 });
 onDeactivated(() => {
@@ -343,6 +394,8 @@ onDeactivated(() => {
     top: 0;
     right: 140px;
     z-index: 999;
+    display: flex;
+    align-items: center;
     .shouqi {
       -webkit-app-region: no-drag;
       position: absolute;
@@ -354,6 +407,12 @@ onDeactivated(() => {
         background-color: #d3d3d3;
         border-radius: 5px;
       }
+    }
+
+    svg {
+      height: 25px !important;
+      font-size: 16px;
+      padding: 4px 0;
     }
     .icon-shezhi {
       font-weight: bold;
@@ -408,6 +467,39 @@ onDeactivated(() => {
   }
   .maxWidth {
     width: 100% !important;
+  }
+}
+.more-options {
+  width: 100%;
+  padding: 10px 0 0;
+  margin-top: 10px;
+  box-sizing: border-box;
+  user-select: none;
+  .bar-item {
+    display: flex;
+    justify-content: space-around;
+  }
+}
+</style>
+
+<style lang="less">
+.arco-trigger-popup {
+  .arco-dropdown {
+    padding: 5px;
+    background-color: #e3e5e5;
+    border-radius: 5px;
+    .arco-dropdown-option {
+      line-height: 20px;
+      padding: 4px 20px;
+      border-radius: 5px;
+      &:hover {
+        background-color: #4676ee;
+        color: white;
+      }
+    }
+  }
+  .dop-text {
+    margin-left: 10px;
   }
 }
 </style>

@@ -50,13 +50,18 @@ app
       });
       return res;
     });
-    ipcMain.handle("saveToGit", (e, str) => {
-      console.log("saveToGit", str);
-      let cmdpath = "/Users/ouyinheng/Documents/test/effieFolder";
+    ipcMain.handle("saveToGit", async (e, str) => {
+      let cmdpath = "/Users/ouyinheng/Documents/test/";
       // 子进程名称
       let workerprocess;
-      runexec(str);
-      function runexec(cmdstr) {
+      // await runexec(str);
+      return new Promise((resolve, reject) => {
+        exec(str, { cwd: cmdpath }, (error, stdout, stderr) => {
+          resolve({ error, stdout, stderr });
+        });
+      });
+
+      async function runexec(cmdstr) {
         workerprocess = exec(cmdstr, { cwd: cmdpath });
         // 打印正常的后台可执行程序输出
         workerprocess.stdout.on("data", function (data) {
