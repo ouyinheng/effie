@@ -1,5 +1,5 @@
 <template>
-  <div class="more-bar">
+  <div class="more-bar" v-if="false">
     <a-dropdown>
       <span class="iconfont icon-xuanxiang"></span>
       <template #content>
@@ -24,10 +24,20 @@
 </template>
 
 <script lang="ts">
-import { onMounted, defineComponent, onDeactivated, reactive, ref, watch, nextTick } from "vue";
+import {
+  onMounted,
+  defineComponent,
+  onDeactivated,
+  reactive,
+  ref,
+  watch,
+  nextTick,
+  inject
+} from "vue";
 import Vditor from "vditor";
 import "vditor/dist/index.css";
 import { useCounterStore } from "@/stores/counter";
+import utils from "@/utils/utils";
 
 export default defineComponent({
   props: {
@@ -91,12 +101,10 @@ export default defineComponent({
         }
       }
     );
-    const saveDocData = () => {
-      if (state.setTimeout) clearTimeout(state.setTimeout);
-      state.setTimeout = setTimeout(() => {
-        state.previewHtml = state.vditor.getHTML();
-        emit("saveDocData", state.vditor.getValue());
-      }, 500);
+    const saveDocData = (val: string) => {
+      state.previewHtml = state.vditor.getHTML();
+      emit("saveDocData", val);
+      console.log("html", state.previewHtml, val);
     };
 
     const togglePreview = () => {
@@ -107,12 +115,36 @@ export default defineComponent({
       console.log("test");
       state.vditor = new Vditor("vditor", {
         mode: props.editorConfig?.mode,
+        lang: "zh_CN",
+        _lutePath: "src/assets/dist/js/lute.min.js",
+        icon: "ant",
+        cdn: "src/assets",
         after: () => {
           state.vditor.setValue(props.editorValue);
           state.previewHtml = state.vditor.getHTML();
         },
+        input: (val) => {
+          saveDocData(val);
+        },
+        preview: {
+          theme: {
+            current: "light",
+            path: "src/assets/dist/css/content-theme"
+          }
+        },
+        image: {
+          isPreview: false,
+          preview: (bom: Element) => {
+            const vditor = document.querySelector("#vditor");
+            utils.resizeImg(bom, vditor);
+          }
+        },
+        resize: {
+          enable: true
+        },
         toolbarConfig: {
-          hide: props.editorConfig.hide
+          hide: props.editorConfig.hide,
+          pin: false
         },
         toolbar: [
           "emoji",
@@ -143,16 +175,12 @@ export default defineComponent({
           "fullscreen"
         ]
       });
-      const vidtorGroup = document.querySelector(".vidtor-group");
-      if (vidtorGroup) vidtorGroup.addEventListener("keyup", saveDocData);
     };
 
     onMounted(() => {
-      renderVditor();
-    });
-    onDeactivated(() => {
-      const vidtorGroup = document.querySelector(".vidtor-group");
-      if (vidtorGroup) vidtorGroup.removeEventListener("keyup", saveDocData);
+      nextTick(() => {
+        renderVditor();
+      });
     });
     return {
       state,

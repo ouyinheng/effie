@@ -36,7 +36,7 @@
               @contextmenu.stop="onContextBarMenu($event, item)"
             />
           </div>
-          <div class="more-options border-top">
+          <div class="more-options border-top" v-if="false">
             <a-dropdown @select="handleSelect" :popup-max-height="false">
               <BarItem :loading="state.loading" name="更多操作" />
               <template #content>
@@ -185,27 +185,24 @@ const refresh = async () => {
   try {
     state.loading = true;
     let res = await ipc.invoke("saveToGit", "git pull origin main");
-    console.log("res1", res);
-    if (res?.error) return;
+    // if (res?.error) return;
     res = await ipc.invoke("saveToGit", "git add *");
-    console.log("res2", res);
     if (res?.error) return;
     const year = new Date().getFullYear();
     const month = new Date().getMonth() + 1;
     const day = new Date().getDay();
     res = await ipc.invoke("saveToGit", `git commit -m '${year + "" + month + "" + day}更新'`);
-    console.log("res3", res);
     if (res?.error) {
       throw new Error();
     }
-    res = await ipc.invoke("saveToGit", "git push origin main");
-    console.log("res4", res);
+    res = await ipc.invoke("saveToGit", "git push origin main --force");
     if (res?.error) {
       throw new Error();
     }
     state.loading = false;
     Message.success("同步成功");
   } catch (error) {
+    console.log("error", error);
     state.loading = false;
     Message.error("同步失败：可能为内容没有更改");
   }

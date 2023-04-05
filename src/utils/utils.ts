@@ -57,5 +57,60 @@ export default {
       db.get("userList").find({ name: activeItem }).get("children").remove({ name }).write();
       dbase.removeFile(`doc/${activeItem}/${name}`);
     });
+  },
+  resizeImg(dom: HTMLElement, actionScope: any) {
+    let resizeFlag: boolean = false;
+    let resizeFdom: Element;
+    let pageX = 0;
+    let pageY = 0;
+    let width = 200;
+    let parent: any = null;
+    addResize();
+    setTimeout(() => {
+      init();
+    });
+    function init() {
+      mouseDown();
+      mouseMove();
+      mouseUp();
+      mouseLeave();
+    }
+    function addResize() {
+      parent = dom.parentElement;
+      parent.setAttribute("class", "img-parent");
+      resizeFdom = document.createElement("div");
+      resizeFdom.setAttribute("class", "img-resize");
+      parent?.appendChild(resizeFdom);
+    }
+    function mouseDown() {
+      resizeFdom.addEventListener("mousedown", () => {
+        resizeFlag = true;
+      });
+    }
+    function mouseMove() {
+      actionScope.addEventListener("mousemove", (e: MouseEvent) => {
+        if (resizeFlag) {
+          if (!pageX) pageX = e.pageX;
+          if (!pageY) pageY = e.pageY;
+          width = Number(dom?.style.width.replace("px", "")) || 200;
+          let x = e.pageX - pageX;
+          width += x;
+          dom.style.width = width + "px";
+          pageX = e.pageX;
+        }
+      });
+    }
+    function mouseUp() {
+      actionScope.addEventListener("mouseleave", (e: MouseEvent) => {
+        resizeFlag = false;
+      });
+    }
+    function mouseLeave() {
+      actionScope.addEventListener("mouseup", (e: MouseEvent) => {
+        resizeFlag = false;
+        parent.setAttribute("class", "");
+        parent?.removeChild(resizeFdom);
+      });
+    }
   }
 };

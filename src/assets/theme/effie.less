@@ -1,6 +1,6 @@
 .effie {
   * {
-    font-family: PingFangSC-Regular, sans-serif !important;
+    // font-family: PingFangSC-Regular, sans-serif !important;
   }
   .before() {
     &::before {
@@ -16,28 +16,30 @@
   h6 {
     color: #3e8cc1 !important;
     border: 0 !important;
+    font-size: 22px !important;
+    line-height: 22px !important;
     .before();
   }
   strong {
-    font-size: 20px !important;
+    font-size: 22px !important;
     color: #ae427b;
   }
   em {
-    font-size: 20px !important;
+    font-size: 22px !important;
     color: #d29f38 !important;
   }
   s {
-    font-size: 20px !important;
+    font-size: 22px !important;
     color: #c4c2c2 !important;
   }
   code {
-    font-size: 20px !important;
+    font-size: 22px !important;
     background-color: #e4f1ec !important;
     color: #408a7c !important;
     .before();
   }
   blockquote {
-    font-size: 20px !important;
+    font-size: 22px !important;
     background-color: #e2eff8;
     color: #65a3ce !important;
     border: 0 !important;
@@ -47,7 +49,7 @@
   }
   a,
   .vditor-ir__link {
-    font-size: 20px !important;
+    font-size: 22px !important;
     color: #3e8cc1;
     text-decoration: none;
     &:hover {
@@ -55,12 +57,12 @@
     }
   }
   ul li {
-    font-size: 20px !important;
+    font-size: 22px !important;
     list-style: disc;
     color: #666666;
   }
   ol li {
-    font-size: 20px !important;
+    font-size: 22px !important;
     list-style: inside decimal;
     color: #666666;
     &::marker {
@@ -68,8 +70,15 @@
     }
   }
   img {
-    font-size: 20px !important;
+    font-size: 22px !important;
     border-radius: 5px;
+    width: 200px;
+    object-fit: cover;
+    background-repeat: no-repeat;
+  }
+  span,
+  p {
+    font-size: 22px !important;
   }
   .katex .katex-html > .newline {
     display: inline-block !important;

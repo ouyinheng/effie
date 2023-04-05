@@ -1,14 +1,36 @@
 @import "./base.css";
-
+@import "./font/index.css";
 * {
   padding: 0;
   margin: 0;
   font-size: 14px;
+  font-family: "阿里妈妈东方大楷 Regular" !important;
+  word-spacing: 2px;
+  letter-spacing: 2px;
 }
 #app {
   width: 100vw;
   height: 100vh;
   font-weight: normal;
+}
+.img-parent {
+  display: flex;
+}
+.img-resize {
+  display: block;
+  width: 5px;
+  position: relative;
+}
+.img-resize::before {
+  content: "";
+  position: absolute;
+  cursor: se-resize;
+  bottom: 0;
+  right: 8px;
+  width: 8px;
+  height: 10px;
+  background-color: red;
+  z-index: 100;
 }
 .border-bottom {
   border-bottom: 1px solid #babdbf;

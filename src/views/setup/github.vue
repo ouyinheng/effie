@@ -41,12 +41,7 @@ export default defineComponent({
       });
       try {
         let res = await ipc.invoke("saveToGit", "git remote -v");
-        if (res.stdout.indexOf(form.giturl) !== -1) {
-          setupdb.getData((db: any) => {
-            db.set("github.init", true).value();
-            db.write();
-          });
-        } else {
+        if (res?.stdout.indexOf(form.giturl) === -1) {
           res = await ipc.invoke("saveToGit", "git init");
           if (res?.error) throw new Error();
           res = await ipc.invoke("saveToGit", `git remote add origin ${form.giturl}`);
