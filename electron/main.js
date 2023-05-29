@@ -30,7 +30,7 @@ const createWindow = () => {
   } else {
     console.log("现在是线上的");
     win.webContents.openDevTools();
-    let url = "http://localhost:5173"; // 本地启动的vue项目路径
+    let url = "http://localhost:5174"; // 本地启动的vue项目路径
     win.loadURL(url);
   }
 };
